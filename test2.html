@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body style="padding: 100px 300px">
+    <video id="video" width="600" muted style="margin: auto;">
+        <source src="https://theaenergy1dev.wpengine.com/wp-content/uploads/2024/08/1-3-HD-Black-1.mp4"
+            type="video/mp4">
+    </video>
+
+
+    <script>
+        document.addEventListener('wheel', (event) => {
+            const video = document.getElementById('video');
+            const delta = event.deltaY;  // Detect scroll direction
+            const step = .3;            // Adjust this for smoothness (seconds per scroll)
+        
+            if (delta > 0) {
+                video.currentTime = Math.min(video.duration, video.currentTime + step);
+            } else {
+                video.currentTime = Math.max(0, video.currentTime - step);
+            }
+        });
+    </script>
+
+</body>
+
+
+
+</html>
