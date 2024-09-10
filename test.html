@@ -221,27 +221,54 @@
         const rightCol = section.querySelector('.right-column');    
     
         // Create a GSAP timeline for each video    
-        video.addEventListener("loadedmetadata", () => {    
-            const videoDuration = video.duration;    
-    
-            // First ScrollTrigger for scrubbing the video up to the last 3 seconds    
-            ScrollTrigger.create({    
-                trigger: section,    
-                start: "top center", // Start when the scroll is at the center of the viewport    
-                end: () => 'bottom bottom-=100',    
-                scrub: 0.05, // Reduce scrub value for smoother updates    
-                onUpdate: (self) => {    
-                    const progress = self.progress;    
-                    const duration = video.duration || 1;    
-    
-                    // Use a more precise interpolation to calculate the current time    
-                    requestAnimationFrame(() => {  
-                        const currentTime = gsap.utils.interpolate(0, duration, progress);    
-                        video.currentTime = currentTime;    
-                    });  
-                }    
-            });    
-        });    
+        video.addEventListener("loadedmetadata", () => {
+            const videoDuration = video.duration;
+            let isInsideTrigger = false;
+            const wheelSlowdownFactor = 0.2; // Adjust this value to change wheel slow down effect (lower = slower)
+        
+            function wheelHandler(e) {
+                if (isInsideTrigger) {
+                    e.preventDefault();
+                    window.scrollBy({
+                        top: e.deltaY * wheelSlowdownFactor,
+                        behavior: 'auto'
+                    });
+                }
+            }
+        
+            ScrollTrigger.create({
+                trigger: section,
+                start: "top center",
+                end: () => 'bottom bottom-=100',
+                scrub: 0.05,
+                onEnter: () => {
+                    isInsideTrigger = true;
+                    window.addEventListener('wheel', wheelHandler, { passive: false });
+                },
+                onLeave: () => {
+                    isInsideTrigger = false;
+                    window.removeEventListener('wheel', wheelHandler);
+                },
+                onEnterBack: () => {
+                    isInsideTrigger = true;
+                    window.addEventListener('wheel', wheelHandler, { passive: false });
+                },
+                onLeaveBack: () => {
+                    isInsideTrigger = false;
+                    window.removeEventListener('wheel', wheelHandler);
+                },
+                onUpdate: (self) => {
+                    const progress = self.progress;
+                    const duration = video.duration || 1;
+        
+                    requestAnimationFrame(() => {
+                        const currentTime = gsap.utils.interpolate(0, duration, progress);
+                        video.currentTime = currentTime;
+                        console.log(`Video time updated: ${currentTime.toFixed(2)} / ${duration.toFixed(2)}`);
+                    });
+                }
+            });
+        });
     
         // Preload the video to ensure smooth playback    
         if (window.fetch) {    
