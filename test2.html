@@ -15,17 +15,33 @@
 
 
     <script>
-        document.addEventListener('wheel', (event) => {
-            const video = document.getElementById('video');
-            const delta = event.deltaY;  // Detect scroll direction
-            const step = .3;            // Adjust this for smoothness (seconds per scroll)
+        const video = document.getElementById('video');
+        let targetTime = video.currentTime;   // Target time to interpolate towards
+        let animationFrame;                   // Store the current animation frame
         
-            if (delta > 0) {
-                video.currentTime = Math.min(video.duration, video.currentTime + step);
-            } else {
-                video.currentTime = Math.max(0, video.currentTime - step);
+        document.addEventListener('wheel', (event) => {
+            const delta = event.deltaY;        // Scroll direction
+            const step = 0.5;                  // How much the time should change per scroll (adjust for sensitivity)
+        
+            targetTime = Math.max(0, Math.min(video.duration, targetTime + (delta > 0 ? step : -step)));
+            
+            if (!animationFrame) {
+                animateVideo();
             }
         });
+        
+        function animateVideo() {
+            const currentTime = video.currentTime;
+            const timeDiff = targetTime - currentTime;
+            
+            if (Math.abs(timeDiff) > 0.01) {   // Tolerance for smooth stop
+                video.currentTime = currentTime + timeDiff * 0.1;  // Adjust 0.1 to control easing speed
+                animationFrame = requestAnimationFrame(animateVideo);
+            } else {
+                animationFrame = null;         // Stop animation when close enough to target
+            }
+        }
+        </script>
     </script>
 
 </body>
